@@ -1,65 +1,100 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import Link from "next/link";
+import Layout from "../components/Layout";
+import MovieCard from "../components/MovieCard";
 
-export default function Home() {
+const Index = ({ featuredMovies }) => {
+  console.log("Featured Movies", featuredMovies);
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
+    <Layout>
+      <div className="flex justify-end p-10">
+        <Link href="/movies">
+          <a className="px-3 py-2 bg-purple-600 text-white rounded-lg">
+            Find More Movies
           </a>
+        </Link>
+      </div>
 
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
+      <div className="flex flex-col gap-10 px-10">
+        <div>
+          <div className="flex flex-col gap-5">
+            <p className="text-2xl font-medium mx-10 text-white">
+              Latest Telugu Movies
             </p>
-          </a>
+            <div
+              className="flex gap-10 flex-wrap bg-gray-200 p-10 overflow-auto justify-center mx-10"
+              style={{ maxHeight: 800 }}
+            >
+              {featuredMovies.telugu.Search.map((movie) => {
+                if (movie.Poster !== "N/A") {
+                  return <MovieCard movie={movie} view="home" />;
+                }
+              })}
+            </div>
+          </div>
         </div>
-      </main>
+        <hr></hr>
+        <div>
+          <div className="flex flex-col gap-5">
+            <p className="text-2xl font-medium mx-10 text-white">
+              Latest Engilsh Movies
+            </p>
+            <div
+              className="flex gap-10 flex-wrap bg-gray-200 p-10 overflow-auto justify-center mx-10"
+              style={{ maxHeight: 800 }}
+            >
+              {featuredMovies.english.Search.map((movie) => {
+                if (movie.Poster !== "N/A") {
+                  return <MovieCard movie={movie} view="home" />;
+                }
+              })}
+            </div>
+          </div>
+        </div>
+        <hr></hr>
+        <div>
+          <div className="flex flex-col gap-5">
+            <p className="text-2xl font-medium mx-10 text-white">
+              Latest Hindi Movies
+            </p>
+            <div
+              className="flex gap-10 flex-wrap bg-gray-200 p-10 overflow-auto justify-center mx-10"
+              style={{ maxHeight: 800 }}
+            >
+              {featuredMovies.hindi.Search.map((movie) => {
+                if (movie.Poster !== "N/A") {
+                  return <MovieCard movie={movie} view="home" />;
+                }
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    </Layout>
+  );
+};
 
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
-  )
-}
+export const getStaticProps = async () => {
+  const telugu = await fetch(
+    `https://www.omdbapi.com/?apikey=4a718f1e&s=prema`
+  );
+  const english = await fetch(
+    `https://www.omdbapi.com/?apikey=4a718f1e&s=mission%20impossible`
+  );
+  const hindi = await fetch(`https://www.omdbapi.com/?apikey=4a718f1e&s=ishq`);
+
+  let teluguMovies = await telugu.json();
+  let englishMovies = await english.json();
+  let hindiMovies = await hindi.json();
+
+  return {
+    props: {
+      featuredMovies: {
+        telugu: teluguMovies,
+        english: englishMovies,
+        hindi: hindiMovies,
+      },
+    },
+  };
+};
+
+export default Index;
