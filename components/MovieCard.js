@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 const MovieCard = ({ movie, view }) => {
-  console.log("Movies", movie);
+  //console.log("Movies", movie);
   return (
     <div className="p-5 flex flex-col gap-3 w-96 bg-gray-100 rounded-lg">
       <div className="flex justify-center h-60">

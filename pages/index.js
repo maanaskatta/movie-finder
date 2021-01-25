@@ -1,100 +1,78 @@
-import Link from "next/link";
+import Router from "next/router";
 import Layout from "../components/Layout";
-import MovieCard from "../components/MovieCard";
+import { useAuth } from "../auth";
+import React, { useState } from "react";
+import firebase from "firebase";
 
-const Index = ({ featuredMovies }) => {
-  console.log("Featured Movies", featuredMovies);
-  return (
-    <Layout>
-      <div className="flex justify-end p-10">
-        <Link href="/movies">
-          <a className="px-3 py-2 bg-purple-600 text-white rounded-lg">
-            Find More Movies
-          </a>
-        </Link>
-      </div>
+const Index = () => {
+  const { user, isLoading } = useAuth();
+  const [email, setEmail] = useState(null);
+  const [password, setPassword] = useState(null);
+  const [isLogginIn, setIsLogginIn] = useState(false);
 
-      <div className="flex flex-col gap-10 px-10">
-        <div>
-          <div className="flex flex-col gap-5">
-            <p className="text-2xl font-medium mx-10 text-white">
-              Latest Telugu Movies
-            </p>
-            <div
-              className="flex gap-10 flex-wrap bg-gray-200 p-10 overflow-auto justify-center mx-10"
-              style={{ maxHeight: 800 }}
-            >
-              {featuredMovies.telugu.Search.map((movie) => {
-                if (movie.Poster !== "N/A") {
-                  return <MovieCard movie={movie} view="home" />;
-                }
-              })}
-            </div>
-          </div>
-        </div>
-        <hr></hr>
-        <div>
-          <div className="flex flex-col gap-5">
-            <p className="text-2xl font-medium mx-10 text-white">
-              Latest Engilsh Movies
-            </p>
-            <div
-              className="flex gap-10 flex-wrap bg-gray-200 p-10 overflow-auto justify-center mx-10"
-              style={{ maxHeight: 800 }}
-            >
-              {featuredMovies.english.Search.map((movie) => {
-                if (movie.Poster !== "N/A") {
-                  return <MovieCard movie={movie} view="home" />;
-                }
-              })}
-            </div>
-          </div>
-        </div>
-        <hr></hr>
-        <div>
-          <div className="flex flex-col gap-5">
-            <p className="text-2xl font-medium mx-10 text-white">
-              Latest Hindi Movies
-            </p>
-            <div
-              className="flex gap-10 flex-wrap bg-gray-200 p-10 overflow-auto justify-center mx-10"
-              style={{ maxHeight: 800 }}
-            >
-              {featuredMovies.hindi.Search.map((movie) => {
-                if (movie.Poster !== "N/A") {
-                  return <MovieCard movie={movie} view="home" />;
-                }
-              })}
-            </div>
-          </div>
-        </div>
-      </div>
-    </Layout>
-  );
-};
+  console.log("Current User", user);
 
-export const getStaticProps = async () => {
-  const telugu = await fetch(
-    `https://www.omdbapi.com/?apikey=4a718f1e&s=prema`
-  );
-  const english = await fetch(
-    `https://www.omdbapi.com/?apikey=4a718f1e&s=mission%20impossible`
-  );
-  const hindi = await fetch(`https://www.omdbapi.com/?apikey=4a718f1e&s=ishq`);
+  const handleLogin = async () => {
+    setIsLogginIn(true);
+    await firebase
+      .auth()
+      .signInWithEmailAndPassword(email, password)
+      .then((user) => {
+        console.log("Current User", user);
+        setIsLogginIn(false);
+        Router.push("/dashboard");
+      })
+      .catch((error) => {
+        console.log(error);
+        setIsLogginIn(false);
 
-  let teluguMovies = await telugu.json();
-  let englishMovies = await english.json();
-  let hindiMovies = await hindi.json();
-
-  return {
-    props: {
-      featuredMovies: {
-        telugu: teluguMovies,
-        english: englishMovies,
-        hindi: hindiMovies,
-      },
-    },
+        alert("Failed to login");
+      });
   };
+
+  if (user) {
+    Router.push("/dashboard");
+    return true;
+  } else {
+    return (
+      <Layout>
+        <div className="flex items-center my-28 justify-center">
+          <div className="bg-white p-10 flex flex-col gap-5 w-1/2 rounded-lg">
+            <div className="flex flex-col gap-2">
+              <label>Email</label>
+              <input
+                type="text"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="px-3 py-2 bg-gray-200 w-full rounded-lg"
+                placeholder="Email"
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label>Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="px-3 py-2 bg-gray-200 w-full rounded-lg"
+                placeholder="Password"
+              />
+            </div>
+
+            <div className="flex justify-center">
+              <button
+                onClick={() => handleLogin()}
+                className="px-3 py-2 bg-blue-600 text-white rounded-lg"
+              >
+                <p>{isLogginIn ? "Please Wait" : "Login"}</p>
+              </button>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 };
 
 export default Index;
